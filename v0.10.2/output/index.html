@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Output · FourierFlows.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link rel="canonical" href="https://fourierflows.github.io/FourierFlowsDocumentation/dev/output/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">FourierFlows.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../installation_instructions/">Installation Instructions</a></li><li><a class="tocitem" href="../basics/">Code Basics</a></li><li><a class="tocitem" href="../grids/">Grids</a></li><li><a class="tocitem" href="../aliasing/">Aliasing</a></li><li><a class="tocitem" href="../problem/">Problem</a></li><li><a class="tocitem" href="../diagnostics/">Diagnostics</a></li><li class="is-active"><a class="tocitem" href>Output</a></li><li><a class="tocitem" href="../gpu/">GPU</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../literated/OneDShallowWaterGeostrophicAdjustment/">Linear rotating shallow water dynamics</a></li></ul></li><li><a class="tocitem" href="../contributing/">Contributor&#39;s guide</a></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../library/outline/">Contents</a></li><li><a class="tocitem" href="../library/public/">Public</a></li><li><a class="tocitem" href="../library/internals/">Private</a></li><li><a class="tocitem" href="../library/function_index/">Function index</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Output</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Output</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/FourierFlows/FourierFlows.jl/blob/main/docs/src/output.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Output"><a class="docs-heading-anchor" href="#Output">Output</a><a id="Output-1"></a><a class="docs-heading-anchor-permalink" href="#Output" title="Permalink"></a></h1><p>To save output we use <a href="../library/public/#FourierFlows.Output"><code>Output</code></a>. Let&#39;s see how we can use the example developed in <a href="../problem/#problem_docs">Problem</a> and <a href="../diagnostics/#diagnostics_docs">Diagnostics</a> sections to demonstrate how we can save some output to disk and then load it.</p><p>After we have created the problem (<code>prob</code>) and the energy diagnostic (<code>E</code>), we can construct an <a href="../library/public/#FourierFlows.Output"><code>Output</code></a>. We first choose where we&#39;d like to output the <code>.jld2</code> file(s):</p><pre><code class="language-julia hljs">filepath = &quot;.&quot;
+filename = joinpath(filepath, &quot;simplestpde.jld2&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;./simplestpde.jld2&quot;</code></pre><p>and the construct the <a href="../library/public/#FourierFlows.Output"><code>Output</code></a>. To do so, we provide tuples of fields that we want to output and a function what takes <code>prob</code> as its argument and returns the corresponding value of that field. For this example, let&#39;s save the energy <code>E</code> and the state vector <code>sol</code>.</p><pre><code class="language-julia hljs">get_uh(prob) = prob.sol
+
+out = Output(prob, filename, (:uh, get_uh), (:E, energy))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Output
+  ├──── prob: FourierFlows.Problem{DataType, Vector{ComplexF64}, Float64, Vector{Float64}}
+  ├──── path: ./simplestpde.jld2
+  └── fields: Dict{Symbol, Function}(:uh =&gt; Main.get_uh, :E =&gt; Main.energy)</code></pre><p>Note that we haven&#39;t saved anything to disk yet!</p><p>By calling <a href="../library/public/#FourierFlows.saveproblem-Tuple{Any, Any}"><code>saveproblem</code></a></p><pre><code class="language-julia hljs">saveproblem(out)</code></pre><p>we write all certain aspects of the problem on the <code>.jld2</code> file. For example, doing so saves the grid parameters (<code>Lx</code>, <code>nx</code>, ...), everything in <code>prob.params</code>, the the linear operator and its attributes from <code>prob.eqn</code>, and the time-step (<code>prob.clock.dt</code>). All these are very useful in case we&#39;d like to re-create the problem.</p><p>Let&#39;s open the file and have a quick look what&#39;s been written there.</p><pre><code class="language-julia hljs">using JLD2
+file = jldopen(out.path)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">JLDFile /home/runner/work/FourierFlows.jl/FourierFlows.jl/docs/build/simplestpde.jld2 (read-only)
+ ├─📂 eqn
+ │  ├─🔢 L
+ │  ├─🔢 dims
+ │  └─🔢 T
+ ├─📂 clock
+ │  └─🔢 dt
+ ├─📂 grid
+ │  ├─🔢 nx
+ │  └─ ⋯ (2 more entries)
+ └─📂 params (1 entry)</code></pre><p>Accessing the saved values is done using usual HDF5 way, e.g.,</p><pre><code class="language-julia hljs">file[&quot;grid/nx&quot;]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">32</code></pre><p>Let&#39;s now close the <code>file</code> and move on with our demonstration.</p><pre><code class="language-julia hljs">close(file)</code></pre><p>Now we can start saving our output fields. We do so via <a href="../library/public/#FourierFlows.saveoutput-Tuple{Any}"><code>saveoutput</code></a>, which will go through the list of fields we provided to <a href="../library/public/#FourierFlows.Output"><code>Output</code></a>, call the functions that compute the fields, and write their results on disk.</p><pre><code class="language-julia hljs">saveoutput(out)</code></pre><p>The output fields are saved under <code>&quot;snapshots&quot;</code> group, e.g.,</p><pre><code class="language-julia hljs">file = jldopen(out.path)
+file[&quot;snapshots&quot;]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">JLD2.Group
+ ├─📂 t
+ │  └─🔢 0
+ ├─📂 uh
+ │  └─🔢 0
+ └─📂 E
+    └─🔢 0</code></pre><p>Let&#39;s close the <code>file</code> again.</p><pre><code class="language-julia hljs">close(file)</code></pre><p>We can now time-step the problem forward and save the output files on disk every so often.</p><pre><code class="language-julia hljs">for _ in 1:40
+    stepforward!(prob, E, 5)
+    saveoutput(out)
+end</code></pre><p>All right! Now we have simulated 200 time-steps saving output every 5 time-steps.</p><p>Let&#39;s see now how we can load the output we saved in the <code>.jld2</code> file and visualize it.</p><p>We load the <code>.jld2</code> file and extract the saved iterations.</p><pre><code class="language-julia hljs">file = jldopen(out.path)
+
+iterations = parse.(Int, keys(file[&quot;snapshots/t&quot;]))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">41-element Vector{Int64}:
+   0
+   5
+  10
+  15
+  20
+  25
+  30
+  35
+  40
+  45
+   ⋮
+ 160
+ 165
+ 170
+ 175
+ 180
+ 185
+ 190
+ 195
+ 200</code></pre><p>Then we can construct a vector with all saved times and all saved values for energy.</p><pre><code class="language-julia hljs">times = [file[&quot;snapshots/t/$iteration&quot;] for iteration in iterations]
+
+energies = [file[&quot;snapshots/E/$iteration&quot;] for iteration in iterations]</code></pre><p>and plot:</p><pre><code class="language-julia hljs">using CairoMakie
+
+lines(times, energies; axis = (xlabel = &quot;t&quot;, ylabel = &quot;energy&quot;))</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600pt" height="450pt" viewBox="0 0 600 450" version="1.1">
+<defs>
+<g>
+<symbol overflow="visible" id="glyph0-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph0-1-QJEKRUlC">
+<path style="stroke:none;" d="M 3.8125 0 C 3.390625 0.078125 3.09375 0.109375 2.796875 0.109375 C 1.8125 0.109375 1.28125 -0.34375 1.28125 -1.140625 C 1.28125 -1.140625 1.28125 -6.84375 1.28125 -6.84375 C 1.28125 -6.84375 0.203125 -6.84375 0.203125 -6.84375 C 0.203125 -6.84375 0.203125 -7.859375 0.203125 -7.859375 C 0.203125 -7.859375 1.28125 -7.859375 1.28125 -7.859375 C 1.28125 -7.859375 1.28125 -10.015625 1.28125 -10.015625 C 1.28125 -10.015625 2.515625 -10.015625 2.515625 -10.015625 C 2.515625 -10.015625 2.515625 -7.859375 2.515625 -7.859375 C 2.515625 -7.859375 3.8125 -7.859375 3.8125 -7.859375 C 3.8125 -7.859375 3.8125 -6.84375 3.8125 -6.84375 C 3.8125 -6.84375 2.515625 -6.84375 2.515625 -6.84375 C 2.515625 -6.84375 2.515625 -1.6875 2.515625 -1.6875 C 2.515625 -1.140625 2.671875 -0.984375 3.203125 -0.984375 C 3.453125 -0.984375 3.640625 -1 3.8125 -1.046875 C 3.8125 -1.046875 3.8125 0 3.8125 0 Z M 3.8125 0 "/>
+</symbol>
+<symbol overflow="visible" id="glyph1-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph1-1-QJEKRUlC">
+<path style="stroke:none;" d="M 7.609375 -5.109375 C 7.609375 -1.625 6.375 0.21875 4.125 0.21875 C 1.84375 0.21875 0.640625 -1.625 0.640625 -5.203125 C 0.640625 -8.78125 1.828125 -10.640625 4.125 -10.640625 C 6.4375 -10.640625 7.609375 -8.8125 7.609375 -5.109375 Z M 6.25 -5.234375 C 6.25 -8.078125 5.546875 -9.46875 4.125 -9.46875 C 2.703125 -9.46875 2 -8.09375 2 -5.1875 C 2 -2.28125 2.703125 -0.875 4.09375 -0.875 C 5.5625 -0.875 6.25 -2.21875 6.25 -5.234375 Z M 6.25 -5.234375 "/>
+</symbol>
+<symbol overflow="visible" id="glyph2-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph2-1-QJEKRUlC">
+<path style="stroke:none;" d="M 5.203125 0 C 5.203125 0 3.890625 0 3.890625 0 C 3.890625 0 3.890625 -7.578125 3.890625 -7.578125 C 3.890625 -7.578125 1.53125 -7.578125 1.53125 -7.578125 C 1.53125 -7.578125 1.53125 -8.515625 1.53125 -8.515625 C 3.5625 -8.78125 3.875 -9 4.328125 -10.640625 C 4.328125 -10.640625 5.203125 -10.640625 5.203125 -10.640625 C 5.203125 -10.640625 5.203125 0 5.203125 0 Z M 5.203125 0 "/>
+</symbol>
+<symbol overflow="visible" id="glyph2-2-QJEKRUlC">
+<path style="stroke:none;" d="M 7.59375 -3.09375 C 7.59375 -1.078125 6.1875 0.21875 3.984375 0.21875 C 1.8125 0.21875 0.640625 -0.84375 0.484375 -3.203125 C 0.484375 -3.203125 1.796875 -3.203125 1.796875 -3.203125 C 1.890625 -1.671875 2.59375 -0.9375 4.03125 -0.9375 C 5.421875 -0.9375 6.234375 -1.734375 6.234375 -3.078125 C 6.234375 -4.265625 5.484375 -4.953125 4.03125 -4.953125 C 4.03125 -4.953125 3.3125 -4.953125 3.3125 -4.953125 C 3.3125 -4.953125 3.3125 -6.0625 3.3125 -6.0625 C 5.4375 -6.0625 5.921875 -6.53125 5.921875 -7.671875 C 5.921875 -8.796875 5.21875 -9.484375 4.046875 -9.484375 C 2.703125 -9.484375 2.0625 -8.78125 2.03125 -7.203125 C 2.03125 -7.203125 0.703125 -7.203125 0.703125 -7.203125 C 0.75 -9.46875 1.890625 -10.640625 4.03125 -10.640625 C 6.0625 -10.640625 7.28125 -9.546875 7.28125 -7.703125 C 7.28125 -6.640625 6.78125 -5.953125 5.796875 -5.5625 C 7.0625 -5.125 7.59375 -4.375 7.59375 -3.09375 Z M 7.59375 -3.09375 "/>
+</symbol>
+<symbol overflow="visible" id="glyph3-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph3-1-QJEKRUlC">
+<path style="stroke:none;" d="M 7.671875 -7.515625 C 7.671875 -6.203125 6.90625 -5.09375 5.421875 -4.3125 C 5.421875 -4.3125 3.921875 -3.5 3.921875 -3.5 C 2.609375 -2.734375 2.125 -2.171875 2 -1.3125 C 2 -1.3125 7.59375 -1.3125 7.59375 -1.3125 C 7.59375 -1.3125 7.59375 0 7.59375 0 C 7.59375 0 0.515625 0 0.515625 0 C 0.625 -2.34375 1.28125 -3.34375 3.5 -4.609375 C 3.5 -4.609375 4.875 -5.390625 4.875 -5.390625 C 5.8125 -5.921875 6.3125 -6.640625 6.3125 -7.484375 C 6.3125 -8.625 5.421875 -9.484375 4.21875 -9.484375 C 2.90625 -9.484375 2.171875 -8.734375 2.0625 -6.9375 C 2.0625 -6.9375 0.75 -6.9375 0.75 -6.9375 C 0.828125 -9.53125 2.078125 -10.640625 4.265625 -10.640625 C 6.265625 -10.640625 7.671875 -9.3125 7.671875 -7.515625 Z M 7.671875 -7.515625 "/>
+</symbol>
+<symbol overflow="visible" id="glyph4-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph4-1-QJEKRUlC">
+<path style="stroke:none;" d="M 7.796875 -2.546875 C 7.796875 -2.546875 6.21875 -2.546875 6.21875 -2.546875 C 6.21875 -2.546875 6.21875 0 6.21875 0 C 6.21875 0 4.90625 0 4.90625 0 C 4.90625 0 4.90625 -2.546875 4.90625 -2.546875 C 4.90625 -2.546875 0.421875 -2.546875 0.421875 -2.546875 C 0.421875 -2.546875 0.421875 -3.9375 0.421875 -3.9375 C 0.421875 -3.9375 5.25 -10.640625 5.25 -10.640625 C 5.25 -10.640625 6.21875 -10.640625 6.21875 -10.640625 C 6.21875 -10.640625 6.21875 -3.734375 6.21875 -3.734375 C 6.21875 -3.734375 7.796875 -3.734375 7.796875 -3.734375 C 7.796875 -3.734375 7.796875 -2.546875 7.796875 -2.546875 Z M 4.90625 -3.734375 C 4.90625 -3.734375 4.90625 -8.390625 4.90625 -8.390625 C 4.90625 -8.390625 1.578125 -3.734375 1.578125 -3.734375 C 1.578125 -3.734375 4.90625 -3.734375 4.90625 -3.734375 Z M 4.90625 -3.734375 "/>
+</symbol>
+<symbol overflow="visible" id="glyph5-0-QJEKRUlC">
+<path style="stroke:none;" d="M -10.9375 -0.296875 C -10.9375 -0.296875 0 -0.296875 0 -0.296875 C 0 -0.296875 0 -7.046875 0 -7.046875 C 0 -7.046875 -10.9375 -7.046875 -10.9375 -7.046875 C -10.9375 -7.046875 -10.9375 -0.296875 -10.9375 -0.296875 Z M -0.78125 -1.078125 C -0.78125 -1.078125 -10.15625 -1.078125 -10.15625 -1.078125 C -10.15625 -1.078125 -10.15625 -6.265625 -10.15625 -6.265625 C -10.15625 -6.265625 -0.78125 -6.265625 -0.78125 -6.265625 C -0.78125 -6.265625 -0.78125 -1.078125 -0.78125 -1.078125 Z M -0.78125 -1.078125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph5-1-QJEKRUlC">
+<path style="stroke:none;" d="M -3.5625 -7.6875 C -3.5625 -7.6875 -3.5625 -1.90625 -3.5625 -1.90625 C -1.765625 -1.9375 -0.9375 -2.90625 -0.9375 -4.21875 C -0.9375 -5.21875 -1.34375 -5.921875 -2.390625 -6.265625 C -2.390625 -6.265625 -2.390625 -7.53125 -2.390625 -7.53125 C -0.796875 -7.21875 0.21875 -5.96875 0.21875 -4.171875 C 0.21875 -1.96875 -1.3125 -0.59375 -3.890625 -0.59375 C -6.46875 -0.59375 -8.078125 -2.015625 -8.078125 -4.203125 C -8.078125 -5.671875 -7.3125 -6.875 -6.015625 -7.375 C -5.4375 -7.609375 -4.703125 -7.6875 -3.5625 -7.6875 Z M -4.6875 -6.359375 C -5.90625 -6.359375 -6.9375 -5.421875 -6.9375 -4.1875 C -6.9375 -2.921875 -5.984375 -2.046875 -4.59375 -1.9375 C -4.59375 -1.9375 -4.59375 -6.34375 -4.59375 -6.34375 C -4.625 -6.359375 -4.6875 -6.359375 -4.6875 -6.359375 Z M -4.6875 -6.359375 "/>
+</symbol>
+<symbol overflow="visible" id="glyph6-0-QJEKRUlC">
+<path style="stroke:none;" d="M -10.9375 -0.296875 C -10.9375 -0.296875 0 -0.296875 0 -0.296875 C 0 -0.296875 0 -7.046875 0 -7.046875 C 0 -7.046875 -10.9375 -7.046875 -10.9375 -7.046875 C -10.9375 -7.046875 -10.9375 -0.296875 -10.9375 -0.296875 Z M -0.78125 -1.078125 C -0.78125 -1.078125 -10.15625 -1.078125 -10.15625 -1.078125 C -10.15625 -1.078125 -10.15625 -6.265625 -10.15625 -6.265625 C -10.15625 -6.265625 -0.78125 -6.265625 -0.78125 -6.265625 C -0.78125 -6.265625 -0.78125 -1.078125 -0.78125 -1.078125 Z M -0.78125 -1.078125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph6-1-QJEKRUlC">
+<path style="stroke:none;" d="M 0 -7.3125 C 0 -7.3125 0 -6.0625 0 -6.0625 C 0 -6.0625 -5.4375 -6.0625 -5.4375 -6.0625 C -6.390625 -6.0625 -6.984375 -5.4375 -6.984375 -4.4375 C -6.984375 -3.171875 -5.9375 -2.296875 -4.328125 -2.296875 C -4.328125 -2.296875 0 -2.296875 0 -2.296875 C 0 -2.296875 0 -1.046875 0 -1.046875 C 0 -1.046875 -7.859375 -1.046875 -7.859375 -1.046875 C -7.859375 -1.046875 -7.859375 -2.203125 -7.859375 -2.203125 C -7.859375 -2.203125 -6.546875 -2.203125 -6.546875 -2.203125 C -7.640625 -2.890625 -8.078125 -3.640625 -8.078125 -4.8125 C -8.078125 -6.328125 -7.25 -7.3125 -5.9375 -7.3125 C -5.9375 -7.3125 0 -7.3125 0 -7.3125 Z M 0 -7.3125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph7-0-QJEKRUlC">
+<path style="stroke:none;" d="M -10.9375 -0.296875 C -10.9375 -0.296875 0 -0.296875 0 -0.296875 C 0 -0.296875 0 -7.046875 0 -7.046875 C 0 -7.046875 -10.9375 -7.046875 -10.9375 -7.046875 C -10.9375 -7.046875 -10.9375 -0.296875 -10.9375 -0.296875 Z M -0.78125 -1.078125 C -0.78125 -1.078125 -10.15625 -1.078125 -10.15625 -1.078125 C -10.15625 -1.078125 -10.15625 -6.265625 -10.15625 -6.265625 C -10.15625 -6.265625 -0.78125 -6.265625 -0.78125 -6.265625 C -0.78125 -6.265625 -0.78125 -1.078125 -0.78125 -1.078125 Z M -0.78125 -1.078125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph7-1-QJEKRUlC">
+<path style="stroke:none;" d="M -6.765625 -4.8125 C -6.734375 -2.875 -5.84375 -2.296875 -4.078125 -2.296875 C -4.078125 -2.296875 0 -2.296875 0 -2.296875 C 0 -2.296875 0 -1.046875 0 -1.046875 C 0 -1.046875 -7.859375 -1.046875 -7.859375 -1.046875 C -7.859375 -1.046875 -7.859375 -2.1875 -7.859375 -2.1875 C -7.859375 -2.1875 -6.4375 -2.1875 -6.4375 -2.1875 C -7.609375 -2.90625 -8.078125 -3.53125 -8.078125 -4.328125 C -8.078125 -4.5 -8.0625 -4.609375 -8.046875 -4.8125 C -8.046875 -4.8125 -6.765625 -4.8125 -6.765625 -4.8125 Z M -6.765625 -4.8125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph8-0-QJEKRUlC">
+<path style="stroke:none;" d="M -10.9375 -0.296875 C -10.9375 -0.296875 0 -0.296875 0 -0.296875 C 0 -0.296875 0 -7.046875 0 -7.046875 C 0 -7.046875 -10.9375 -7.046875 -10.9375 -7.046875 C -10.9375 -7.046875 -10.9375 -0.296875 -10.9375 -0.296875 Z M -0.78125 -1.078125 C -0.78125 -1.078125 -10.15625 -1.078125 -10.15625 -1.078125 C -10.15625 -1.078125 -10.15625 -6.265625 -10.15625 -6.265625 C -10.15625 -6.265625 -0.78125 -6.265625 -0.78125 -6.265625 C -0.78125 -6.265625 -0.78125 -1.078125 -0.78125 -1.078125 Z M -0.78125 -1.078125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph8-1-QJEKRUlC">
+<path style="stroke:none;" d="M -1.296875 -7.328125 C 2.171875 -7.328125 3.265625 -6.28125 3.265625 -3.828125 C 3.265625 -1.984375 2.390625 -0.828125 0.90625 -0.6875 C 0.90625 -0.6875 0.90625 -1.96875 0.90625 -1.96875 C 1.859375 -2.109375 2.21875 -2.875 2.21875 -3.875 C 2.21875 -5.328125 1.421875 -6.1875 -0.65625 -6.1875 C -0.65625 -6.1875 -1.1875 -6.1875 -1.1875 -6.1875 C -0.1875 -5.359375 0.21875 -4.671875 0.21875 -3.671875 C 0.21875 -1.828125 -1.375 -0.4375 -3.859375 -0.4375 C -6.40625 -0.4375 -8.078125 -1.78125 -8.078125 -3.78125 C -8.078125 -4.78125 -7.65625 -5.546875 -6.71875 -6.1875 C -6.71875 -6.1875 -7.859375 -6.1875 -7.859375 -6.1875 C -7.859375 -6.1875 -7.859375 -7.328125 -7.859375 -7.328125 C -7.859375 -7.328125 -1.296875 -7.328125 -1.296875 -7.328125 Z M -3.890625 -6.0625 C -5.796875 -6.0625 -6.9375 -5.265625 -6.9375 -3.921875 C -6.9375 -2.578125 -5.8125 -1.734375 -3.9375 -1.734375 C -2.03125 -1.734375 -0.9375 -2.5625 -0.9375 -3.9375 C -0.9375 -5.25 -2.015625 -6.0625 -3.890625 -6.0625 Z M -3.890625 -6.0625 "/>
+</symbol>
+<symbol overflow="visible" id="glyph9-0-QJEKRUlC">
+<path style="stroke:none;" d="M -10.9375 -0.296875 C -10.9375 -0.296875 0 -0.296875 0 -0.296875 C 0 -0.296875 0 -7.046875 0 -7.046875 C 0 -7.046875 -10.9375 -7.046875 -10.9375 -7.046875 C -10.9375 -7.046875 -10.9375 -0.296875 -10.9375 -0.296875 Z M -0.78125 -1.078125 C -0.78125 -1.078125 -10.15625 -1.078125 -10.15625 -1.078125 C -10.15625 -1.078125 -10.15625 -6.265625 -10.15625 -6.265625 C -10.15625 -6.265625 -0.78125 -6.265625 -0.78125 -6.265625 C -0.78125 -6.265625 -0.78125 -1.078125 -0.78125 -1.078125 Z M -0.78125 -1.078125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph9-1-QJEKRUlC">
+<path style="stroke:none;" d="M -7.859375 -7.171875 C -7.859375 -7.171875 1.65625 -3.671875 1.65625 -3.671875 C 2.78125 -3.25 3.265625 -2.53125 3.265625 -1.65625 C 3.265625 -1.3125 3.203125 -1.0625 3.078125 -0.8125 C 3.078125 -0.8125 1.953125 -0.8125 1.953125 -0.8125 C 2.015625 -1.078125 2.046875 -1.296875 2.046875 -1.46875 C 2.046875 -2.015625 1.828125 -2.265625 1.28125 -2.46875 C 1.28125 -2.46875 0.03125 -2.953125 0.03125 -2.953125 C 0.03125 -2.953125 -7.859375 -0.296875 -7.859375 -0.296875 C -7.859375 -0.296875 -7.859375 -1.640625 -7.859375 -1.640625 C -7.859375 -1.640625 -1.734375 -3.640625 -1.734375 -3.640625 C -1.734375 -3.640625 -7.859375 -5.8125 -7.859375 -5.8125 C -7.859375 -5.8125 -7.859375 -7.171875 -7.859375 -7.171875 Z M -7.859375 -7.171875 "/>
+</symbol>
+<symbol overflow="visible" id="glyph10-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph10-1-QJEKRUlC">
+<path style="stroke:none;" d="M 7.609375 -5.109375 C 7.609375 -1.625 6.375 0.21875 4.125 0.21875 C 1.84375 0.21875 0.640625 -1.625 0.640625 -5.203125 C 0.640625 -8.78125 1.828125 -10.640625 4.125 -10.640625 C 6.4375 -10.640625 7.609375 -8.8125 7.609375 -5.109375 Z M 6.25 -5.234375 C 6.25 -8.078125 5.546875 -9.46875 4.125 -9.46875 C 2.703125 -9.46875 2 -8.09375 2 -5.1875 C 2 -2.28125 2.703125 -0.875 4.09375 -0.875 C 5.5625 -0.875 6.25 -2.21875 6.25 -5.234375 Z M 6.25 -5.234375 "/>
+</symbol>
+<symbol overflow="visible" id="glyph10-2-QJEKRUlC">
+<path style="stroke:none;" d="M 7.6875 -3.296875 C 7.6875 -1.21875 6.234375 0.21875 4.21875 0.21875 C 1.78125 0.21875 0.640625 -1.53125 0.640625 -4.84375 C 0.640625 -8.546875 1.984375 -10.640625 4.453125 -10.640625 C 6.078125 -10.640625 7.21875 -9.59375 7.46875 -7.859375 C 7.46875 -7.859375 6.15625 -7.859375 6.15625 -7.859375 C 5.9375 -8.875 5.296875 -9.46875 4.359375 -9.46875 C 2.84375 -9.46875 2.015625 -8.03125 2 -5.4375 C 2.5625 -6.203125 3.390625 -6.609375 4.4375 -6.609375 C 6.34375 -6.609375 7.6875 -5.28125 7.6875 -3.296875 Z M 6.34375 -3.1875 C 6.34375 -4.625 5.546875 -5.4375 4.28125 -5.4375 C 2.96875 -5.4375 2.0625 -4.59375 2.0625 -3.265625 C 2.0625 -1.90625 3 -0.9375 4.234375 -0.9375 C 5.4375 -0.9375 6.34375 -1.859375 6.34375 -3.1875 Z M 6.34375 -3.1875 "/>
+</symbol>
+<symbol overflow="visible" id="glyph11-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph11-1-QJEKRUlC">
+<path style="stroke:none;" d="M 2.859375 0 C 2.859375 0 1.3125 0 1.3125 0 C 1.3125 0 1.3125 -1.5625 1.3125 -1.5625 C 1.3125 -1.5625 2.859375 -1.5625 2.859375 -1.5625 C 2.859375 -1.5625 2.859375 0 2.859375 0 Z M 2.859375 0 "/>
+</symbol>
+<symbol overflow="visible" id="glyph12-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph12-1-QJEKRUlC">
+<path style="stroke:none;" d="M 7.609375 -5.109375 C 7.609375 -1.625 6.375 0.21875 4.125 0.21875 C 1.84375 0.21875 0.640625 -1.625 0.640625 -5.203125 C 0.640625 -8.78125 1.828125 -10.640625 4.125 -10.640625 C 6.4375 -10.640625 7.609375 -8.8125 7.609375 -5.109375 Z M 6.25 -5.234375 C 6.25 -8.078125 5.546875 -9.46875 4.125 -9.46875 C 2.703125 -9.46875 2 -8.09375 2 -5.1875 C 2 -2.28125 2.703125 -0.875 4.09375 -0.875 C 5.5625 -0.875 6.25 -2.21875 6.25 -5.234375 Z M 6.25 -5.234375 "/>
+</symbol>
+<symbol overflow="visible" id="glyph12-2-QJEKRUlC">
+<path style="stroke:none;" d="M 7.6875 -3 C 7.6875 -1.0625 6.21875 0.21875 4.125 0.21875 C 2.03125 0.21875 0.5625 -1.0625 0.5625 -3.015625 C 0.5625 -4.1875 1.15625 -5.015625 2.375 -5.59375 C 1.296875 -6.265625 0.9375 -6.8125 0.9375 -7.796875 C 0.9375 -9.46875 2.25 -10.640625 4.125 -10.640625 C 6.015625 -10.640625 7.3125 -9.46875 7.3125 -7.796875 C 7.3125 -6.796875 6.953125 -6.25 5.859375 -5.59375 C 7.09375 -5.015625 7.6875 -4.1875 7.6875 -3 Z M 5.96875 -7.765625 C 5.96875 -8.8125 5.25 -9.46875 4.125 -9.46875 C 3.015625 -9.46875 2.28125 -8.8125 2.28125 -7.78125 C 2.28125 -6.78125 3.015625 -6.125 4.125 -6.125 C 5.234375 -6.125 5.96875 -6.78125 5.96875 -7.765625 Z M 6.34375 -2.984375 C 6.34375 -4.234375 5.4375 -5.015625 4.125 -5.015625 C 2.8125 -5.015625 1.90625 -4.234375 1.90625 -2.984375 C 1.90625 -1.734375 2.8125 -0.9375 4.09375 -0.9375 C 5.4375 -0.9375 6.34375 -1.71875 6.34375 -2.984375 Z M 6.34375 -2.984375 "/>
+</symbol>
+<symbol overflow="visible" id="glyph13-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph13-1-QJEKRUlC">
+<path style="stroke:none;" d="M 2.859375 0 C 2.859375 0 1.3125 0 1.3125 0 C 1.3125 0 1.3125 -1.5625 1.3125 -1.5625 C 1.3125 -1.5625 2.859375 -1.5625 2.859375 -1.5625 C 2.859375 -1.5625 2.859375 0 2.859375 0 Z M 2.859375 0 "/>
+</symbol>
+<symbol overflow="visible" id="glyph14-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph14-1-QJEKRUlC">
+<path style="stroke:none;" d="M 5.203125 0 C 5.203125 0 3.890625 0 3.890625 0 C 3.890625 0 3.890625 -7.578125 3.890625 -7.578125 C 3.890625 -7.578125 1.53125 -7.578125 1.53125 -7.578125 C 1.53125 -7.578125 1.53125 -8.515625 1.53125 -8.515625 C 3.5625 -8.78125 3.875 -9 4.328125 -10.640625 C 4.328125 -10.640625 5.203125 -10.640625 5.203125 -10.640625 C 5.203125 -10.640625 5.203125 0 5.203125 0 Z M 5.203125 0 "/>
+</symbol>
+<symbol overflow="visible" id="glyph14-2-QJEKRUlC">
+<path style="stroke:none;" d="M 7.609375 -5.109375 C 7.609375 -1.625 6.375 0.21875 4.125 0.21875 C 1.84375 0.21875 0.640625 -1.625 0.640625 -5.203125 C 0.640625 -8.78125 1.828125 -10.640625 4.125 -10.640625 C 6.4375 -10.640625 7.609375 -8.8125 7.609375 -5.109375 Z M 6.25 -5.234375 C 6.25 -8.078125 5.546875 -9.46875 4.125 -9.46875 C 2.703125 -9.46875 2 -8.09375 2 -5.1875 C 2 -2.28125 2.703125 -0.875 4.09375 -0.875 C 5.5625 -0.875 6.25 -2.21875 6.25 -5.234375 Z M 6.25 -5.234375 "/>
+</symbol>
+<symbol overflow="visible" id="glyph15-0-QJEKRUlC">
+<path style="stroke:none;" d="M 0.296875 -10.9375 C 0.296875 -10.9375 0.296875 0 0.296875 0 C 0.296875 0 7.046875 0 7.046875 0 C 7.046875 0 7.046875 -10.9375 7.046875 -10.9375 C 7.046875 -10.9375 0.296875 -10.9375 0.296875 -10.9375 Z M 1.078125 -0.78125 C 1.078125 -0.78125 1.078125 -10.15625 1.078125 -10.15625 C 1.078125 -10.15625 6.265625 -10.15625 6.265625 -10.15625 C 6.265625 -10.15625 6.265625 -0.78125 6.265625 -0.78125 C 6.265625 -0.78125 1.078125 -0.78125 1.078125 -0.78125 Z M 1.078125 -0.78125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph15-1-QJEKRUlC">
+<path style="stroke:none;" d="M 2.859375 0 C 2.859375 0 1.3125 0 1.3125 0 C 1.3125 0 1.3125 -1.5625 1.3125 -1.5625 C 1.3125 -1.5625 2.859375 -1.5625 2.859375 -1.5625 C 2.859375 -1.5625 2.859375 0 2.859375 0 Z M 2.859375 0 "/>
+</symbol>
+</g>
+</defs>
+<g id="surface1-QJEKRUlC">
+<rect x="0" y="0" width="600" height="450" style="fill:rgb(100%25,100%25,100%25);fill-opacity:1;stroke:none;"/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(100%25,100%25,100%25);fill-opacity:1;" d="M 61.5 394.5 L 588 394.5 L 588 12 L 61.5 12 Z M 61.5 394.5 "/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:0.12;stroke-miterlimit:2;" d="M 113.911458 526 L 113.911458 16 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:0.12;stroke-miterlimit:2;" d="M 273.453125 526 L 273.453125 16 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:0.12;stroke-miterlimit:2;" d="M 433 526 L 433 16 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:0.12;stroke-miterlimit:2;" d="M 592.546875 526 L 592.546875 16 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:0.12;stroke-miterlimit:2;" d="M 752.088542 526 L 752.088542 16 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:0.12;stroke-miterlimit:2;" d="M 82 375.739583 L 784 375.739583 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:0.12;stroke-miterlimit:2;" d="M 82 207.463542 L 784 207.463542 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:0.12;stroke-miterlimit:2;" d="M 82 39.182292 L 784 39.182292 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph0-1-QJEKRUlC" x="322.664978" y="435.179993"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph1-1-QJEKRUlC" x="81.261812" y="415.455002"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph2-1-QJEKRUlC" x="200.920898" y="415.455002"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph3-1-QJEKRUlC" x="320.579979" y="415.455002"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph2-2-QJEKRUlC" x="440.239105" y="415.455002"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph4-1-QJEKRUlC" x="559.898163" y="415.455002"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph5-1-QJEKRUlC" x="25.379992" y="226.177483"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph6-1-QJEKRUlC" x="25.379992" y="217.837509"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph5-1-QJEKRUlC" x="25.379992" y="209.497467"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph7-1-QJEKRUlC" x="25.379992" y="201.157494"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph8-1-QJEKRUlC" x="25.380009" y="196.162491"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph9-1-QJEKRUlC" x="25.380009" y="187.822495"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph10-1-QJEKRUlC" x="32.399995" y="287.2733"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph11-1-QJEKRUlC" x="40.74" y="287.2733"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph10-2-QJEKRUlC" x="44.909995" y="287.2733"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph12-1-QJEKRUlC" x="32.399995" y="161.063599"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph13-1-QJEKRUlC" x="40.74" y="161.063599"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph12-2-QJEKRUlC" x="44.909995" y="161.063599"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph14-1-QJEKRUlC" x="32.399995" y="34.853806"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph15-1-QJEKRUlC" x="40.74" y="34.853806"/>
+</g>
+<g style="fill:rgb(0%25,0%25,0%25);fill-opacity:1;">
+  <use xlink:href="%23glyph14-2-QJEKRUlC" x="44.909995" y="34.853806"/>
+</g>
+<path style="fill:none;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,44.705883%25,69.803923%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 113.911458 39.182292 L 129.864583 55.859375 L 145.817708 72.208333 L 161.770833 88.229167 L 177.729167 103.932292 L 193.682292 119.328125 L 209.635417 134.416667 L 225.588542 149.208333 L 241.546875 163.703125 L 257.5 177.911458 L 273.453125 191.838542 L 289.411458 205.489583 L 305.364583 218.869792 L 321.317708 231.989583 L 337.270833 244.84375 L 353.229167 257.442708 L 369.182292 269.796875 L 385.135417 281.901042 L 401.088542 293.765625 L 417.046875 305.401042 L 433 316.802083 L 448.953125 327.973958 L 464.911458 338.927083 L 480.864583 349.661458 L 496.817708 360.1875 L 512.770833 370.5 L 528.729167 380.609375 L 544.682292 390.520833 L 560.635417 400.234375 L 576.588542 409.755208 L 592.546875 419.088542 L 608.5 428.234375 L 624.453125 437.203125 L 640.411458 445.989583 L 656.364583 454.604167 L 672.317708 463.046875 L 688.270833 471.322917 L 704.229167 479.432292 L 720.182292 487.385417 L 736.135417 495.177083 L 752.088542 502.817708 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 113.911458 526.5 L 113.911458 532.5 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 273.453125 526.5 L 273.453125 532.5 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 433 526.5 L 433 532.5 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 592.546875 526.5 L 592.546875 532.5 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 752.088542 526.5 L 752.088542 532.5 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 81.5 375.739583 L 75.5 375.739583 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 81.5 207.463542 L 75.5 207.463542 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 81.5 39.182292 L 75.5 39.182292 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 81.5 526 L 784.5 526 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 82 526.5 L 82 15.5 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 81.5 16 L 784.5 16 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+<path style="fill:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%25,0%25,0%25);stroke-opacity:1;stroke-miterlimit:2;" d="M 784 526.5 L 784 15.5 " transform="matrix(0.75,0,0,0.75,0,0)"/>
+</g>
+</svg>
+'/><p>Lastly, let&#39;s load the saved <code>uh</code> fields, process them (get <code>u</code> by convert to physical space), and animate them.</p><p>We use Makie&#39;s <code>Observable</code> to animate the data. To dive into how <code>Observable</code>s work we refer to <a href="https://makie.juliaplots.org/stable/documentation/nodes/index.html">Makie.jl&#39;s Documentation</a>.</p><pre><code class="language-julia hljs">using CairoMakie, Printf
+
+nx = file[&quot;grid/nx&quot;]
+ x = file[&quot;grid/x&quot;]
+
+n = Observable(1)
+
+u = @lift irfft(file[string(&quot;snapshots/uh/&quot;, iterations[$n])], nx)
+title = @lift @sprintf(&quot;u(x, t=%1.2f)&quot;, file[string(&quot;snapshots/t/&quot;, iterations[$n])])
+
+fig = Figure()
+ax = Axis(fig[1, 1]; xlabel = &quot;x&quot;, title)
+scatterlines!(ax, x, u; markersize = 14)
+
+frames = 1:length(iterations)
+
+record(fig, &quot;animation.mp4&quot;, frames, framerate=16) do i
+    n[] = i
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;animation.mp4&quot;</code></pre><p><video src="../animation.mp4" controls="true" title><a href="../animation.mp4"></a></video></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../diagnostics/">« Diagnostics</a><a class="docs-footer-nextpage" href="../gpu/">GPU »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Thursday 2 February 2023 05:46">Thursday 2 February 2023</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
